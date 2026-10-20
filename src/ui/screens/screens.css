@@ -527,6 +527,17 @@
   display: flex;
   gap: 2px;
   white-space: nowrap;
+  margin-bottom: 3px;
+  opacity: 0.5;
+}
+
+.crib-line.ok {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.crib-line.chosen .lbl {
+  color: var(--lamp-on);
 }
 
 .crib-line span {
@@ -536,6 +547,22 @@
   height: 22px;
   border-radius: 4px;
   flex: none;
+}
+
+.crib-line .lbl {
+  width: 40px;
+  color: var(--faint);
+  justify-content: start;
+}
+
+.crib-line .verdict {
+  width: auto;
+  padding: 0 8px;
+  color: var(--danger);
+}
+
+.crib-line.ok .verdict {
+  color: var(--ok);
 }
 
 .crib-line .c {

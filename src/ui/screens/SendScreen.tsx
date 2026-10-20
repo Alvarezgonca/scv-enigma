@@ -72,7 +72,8 @@ function Transmitter() {
   const abort = useRef<AbortController | null>(null);
   const ctl = useEnigma(settingsForDay(day, [0, 0, 0]));
 
-  const fullText = `Para ${to}, de ${me}: ${body.trim()}`;
+  // Cabeçalho formal, como nas mensagens militares: é também o crib que Bletchley Park exploraria.
+  const fullText = `Para estação ${to}, de estação ${me}: ${body.trim()}`;
   const letters = useMemo(() => prepareText(fullText), [fullText]);
   const secret = pairSecret(net, me, to);
   const parts = Math.ceil(letters.length / MAX_LETTERS_PER_PART);
@@ -196,7 +197,7 @@ function Transmitter() {
             </div>
             <p className="small" style={{ marginTop: 8 }}>
               {letters.length} letras na Enigma ({parts} QR) · {utf8(fullText).length} bytes no AES ({aesParts} QR). O começo
-              “PARA {to} DE {me}” é previsível: é o tipo de trecho que Bletchley Park usava como crib.
+              “PARA ESTAÇÃO {to} DE ESTAÇÃO {me}” é previsível: é o tipo de trecho que Bletchley Park usava como crib.
             </p>
             <div className="row" style={{ marginTop: 12 }}>
               <div className="segmented" role="group" aria-label="Velocidade da animação">

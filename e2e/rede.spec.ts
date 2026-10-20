@@ -45,7 +45,7 @@ test('duas estações: folha por QR, mensagem Enigma e AES por QR, adulteração
   // 4. BRAVO recebe a versão Enigma.
   await bravo.goto('/#/receber');
   await uploadPhotos(bravo, enigmaPhotos);
-  await expect(bravo.getByText(/PARA BRAVO DE ALFA DEFESA CIVIL ABRIGO ABERTO/)).toBeVisible();
+  await expect(bravo.getByText(/PARA ESTACAO BRAVO DE ESTACAO ALFA DEFESA CIVIL ABRIGO ABERTO/)).toBeVisible();
   await bravo.getByRole('button', { name: 'Prova: decifrar com UM anel errado' }).click();
   await expect(bravo.getByText(/Ilegível/)).toBeVisible();
   await bravo.getByRole('button', { name: 'Trocar o destinatário no cabeçalho' }).click();
