@@ -18,7 +18,7 @@ const TIMELINE: readonly { year: string; text: string; modern?: boolean }[] = [
   { year: '9 maio 1941', text: 'O U-110 é capturado pelo HMS Bulldog: máquina e documentos de chaves vão para Bletchley.' },
   {
     year: '1942',
-    text: 'Os submarinos passam à M4 (quatro rotores) e o tráfego “Shark” fica ilegível por meses, até a captura de material do U-559 em outubro.',
+    text: 'Os submarinos passam à M4 (quatro rotores) e o tráfego “Shark” fica ilegível por dez meses; material capturado do U-559 em outubro permite voltar a lê-lo em dezembro.',
   },
   { year: '1943', text: 'A Marinha americana constrói Bombas de alta velocidade em Dayton (EUA).' },
   { year: '1974', text: 'O segredo de Bletchley (“Ultra”) vem a público com o livro de F. W. Winterbotham.' },
@@ -32,12 +32,12 @@ const TIMELINE: readonly { year: string; text: string; modern?: boolean }[] = [
 const LESSONS: readonly { then: string; now: string; here: string }[] = [
   {
     then: 'Folhas de chaves capturadas (U-110, 1941) abriram o tráfego inteiro de uma rede.',
-    now: 'C&M Software (2025): credenciais de um fornecedor comprometidas deram acesso às contas-reserva de bancos no Pix.',
+    now: 'C&M Software (2025): a infraestrutura do fornecedor que liga bancos ao Pix foi comprometida e houve desvio das contas-reserva (lição do edital: credenciais, menor privilégio, risco de fornecedor).',
     here: 'Segredo AES por par de estações, cópia da folha só com o que a estação precisa, distribuição com senha e código de conferência.',
   },
   {
     then: 'Cabeçalhos e frases previsíveis viraram cribs; a máquina não percebia nada errado.',
-    now: 'Meu INSS (2026): uma consulta de serviço sem a autorização certa expôs milhões de CPFs.',
+    now: 'Meu INSS (2026): uma falha numa consulta de serviço do aplicativo expôs 2,8 milhões de CPFs (lição do edital: autorização e testes de API).',
     here: 'Todo QR é tratado como hostil e validado campo a campo; o cabeçalho é autenticado e quem não é destinatário não decifra o modo moderno.',
   },
   {
@@ -47,7 +47,7 @@ const LESSONS: readonly { then: string; now: string; here: string }[] = [
   },
   {
     then: 'Chaves e procedimentos dependiam de disciplina humana e eram repetidos.',
-    now: 'Incidentes com chaves Pix (2026): dados expostos por meses por falta de cifra em repouso e de monitoramento.',
+    now: 'Chaves Pix (2026): o Banco Central comunicou exposições de dados cadastrais, algumas por meses (lição do edital: cifra em repouso, minimização, monitoramento).',
     here: 'Folha cifrada em repouso com chave não exportável do navegador; nada sai do aparelho; nenhum dado pessoal coletado (LGPD).',
   },
 ];
