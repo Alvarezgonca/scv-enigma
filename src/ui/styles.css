@@ -373,6 +373,11 @@ main {
   border-color: rgb(79 209 197 / 40%);
 }
 
+.stack > .tag,
+.stack > .row > .tag {
+  justify-self: start;
+}
+
 .tag {
   display: inline-flex;
   align-items: center;

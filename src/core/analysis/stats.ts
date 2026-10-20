@@ -101,3 +101,32 @@ export function trigramFitness(text: string): number {
   const n = lettersOnly(text).length - 2;
   return n <= 0 ? -10 : trigramScoreText(text) / n;
 }
+
+/**
+ * Mede quantas chaves Enigma este aparelho testa por segundo: monta a máquina com uma chave nova e
+ * decifra 20 letras, repetidamente, durante `ms` milissegundos.
+ */
+export function benchmarkEnigma(ms = 250): number {
+  const cipher = [...'QWERTZUIOPASDFGHJKLY'].map((c) => c.charCodeAt(0) - 65);
+  const base = settingsFrom({ rotors: 'II IV V', rings: 'BUL', plugboard: 'AV BS CG DL FU HZ IN KM OW RX' });
+  const t0 = performance.now();
+  let trials = 0;
+  let sink = 0;
+  while (performance.now() - t0 < ms) {
+    for (let k = 0; k < 200; k++) {
+      const p = trials % 17_576;
+      const m = new EnigmaMachine({
+        ...base,
+        rotors: [
+          { ...base.rotors[0], position: Math.floor(p / 676) },
+          { ...base.rotors[1], position: Math.floor(p / 26) % 26 },
+          { ...base.rotors[2], position: p % 26 },
+        ],
+      });
+      for (const c of cipher) sink += m.press(c).output;
+      trials++;
+    }
+  }
+  if (sink < 0) throw new Error('inalcançável');
+  return trials / ((performance.now() - t0) / 1000);
+}
