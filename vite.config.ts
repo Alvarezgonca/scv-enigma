@@ -1,14 +1,44 @@
-import { defineConfig } from 'vite';
+import { type Plugin, defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // No GitHub Pages o site fica em /<repositório>/; localmente, na raiz.
 const base = process.env.BASE_PATH ?? '/';
 
+/**
+ * Política de segurança de conteúdo (CSP) só no build: o servidor de desenvolvimento injeta
+ * scripts inline para recarregar a página e seria bloqueado. 'wasm-unsafe-eval' é o mínimo para o
+ * leitor de QR em WebAssembly; nenhum script de fora é permitido.
+ */
+const CSP = [
+  "default-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  "media-src 'self' blob:",
+  "connect-src 'self'",
+  "worker-src 'self' blob:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'none'",
+].join('; ');
+
+function contentSecurityPolicy(): Plugin {
+  return {
+    name: 'scv-csp',
+    apply: 'build',
+    transformIndexHtml(html) {
+      return html.replace('<meta charset="UTF-8" />', `<meta charset="UTF-8" />\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`);
+    },
+  };
+}
+
 export default defineConfig({
   base,
   plugins: [
     react(),
+    contentSecurityPolicy(),
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: false,

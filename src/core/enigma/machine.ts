@@ -203,3 +203,14 @@ export class EnigmaMachine {
 export function encryptText(settings: EnigmaSettings, text: string): string {
   return new EnigmaMachine(settings).encrypt(text);
 }
+
+/** Para onde cada contato vai dentro de um rotor nesta posição (usado no desenho da fiação). */
+export function wheelForwardMap(wiring: string, ring: number, position: number): number[] {
+  const { forward } = wiringTables(wiring);
+  const shift = position - ring;
+  return Array.from({ length: SIZE }, (_, c) => mod26((forward[mod26(c + shift)] ?? 0) - shift));
+}
+
+export function reflectorMap(wiring: string): number[] {
+  return [...wiringTables(wiring).forward];
+}
