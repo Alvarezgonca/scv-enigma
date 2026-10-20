@@ -36,6 +36,7 @@ export interface KeySheet {
 }
 
 export const DEFAULT_STATIONS: readonly string[] = ['ALFA', 'BRAVO', 'CHARLIE', 'DELTA'];
+export const MAX_SHEET_DAYS = 28;
 const ARMY_ROTORS: readonly RotorName[] = ['I', 'II', 'III', 'IV', 'V'];
 const CALLSIGN = /^[A-Z]{2,10}$/;
 const NET_NAME = /^[A-Z0-9]{2,16}$/;
@@ -107,7 +108,8 @@ export function generateKeySheet(opts: NewSheetOptions, rng: RandomSource = syst
   if (stations.length < 2 || stations.length > 4) throw new KeySheetError('a rede tem de 2 a 4 estações');
   if (stations.some((s) => !CALLSIGN.test(s))) throw new KeySheetError('indicativo de estação: 2 a 10 letras');
   if (new Set(stations).size !== stations.length) throw new KeySheetError('indicativos repetidos');
-  if (opts.days < 1 || opts.days > 31) throw new KeySheetError('a folha vale de 1 a 31 dias');
+  // Até 28 dias: o cabeçalho identifica a chave pelo dia do mês, que não pode se repetir na folha.
+  if (opts.days < 1 || opts.days > MAX_SHEET_DAYS) throw new KeySheetError(`a folha vale de 1 a ${MAX_SHEET_DAYS} dias`);
 
   const used = new Set<string>();
   const days: DayKey[] = [];
@@ -236,7 +238,7 @@ export function parseSheet(text: string): KeySheet {
   const stations = st.map((s) => (typeof s === 'string' && CALLSIGN.test(s) ? s : fail('indicativo')));
   if (new Set(stations).size !== stations.length) fail('indicativos repetidos');
   if (h !== null && (typeof h !== 'string' || !stations.includes(h))) fail('dono da cópia');
-  if (!Array.isArray(d) || d.length < 1 || d.length > 31) fail('dias');
+  if (!Array.isArray(d) || d.length < 1 || d.length > MAX_SHEET_DAYS) fail('dias');
   const days = d.map((line): DayKey => {
     if (typeof line !== 'string') fail('linha de dia');
     const m = /^(\d{4}-\d{2}-(\d{2})) ([IV]{1,3}\.[IV]{1,3}\.[IV]{1,3}) ([A-Z]{3}) ([A-Z]{20}) ([A-Z]{12})$/.exec(line);
@@ -261,6 +263,7 @@ export function parseSheet(text: string): KeySheet {
     }
     return day;
   });
+  if (new Set(days.map((x) => x.day)).size !== days.length) fail('dia do mês repetido');
   if (!isRecord(k)) fail('segredos');
   const pairSecrets: Record<string, string> = {};
   for (const [pid, secret] of Object.entries(k)) {

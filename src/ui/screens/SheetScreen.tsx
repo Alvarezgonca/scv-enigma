@@ -113,7 +113,7 @@ function CreateNet() {
           </label>
           <label className="field">
             Dias de validade
-            <input type="number" min={1} max={31} value={days} onChange={(e) => setDays(Math.max(1, Math.min(31, Number(e.target.value))))} />
+            <input type="number" min={1} max={28} value={days} onChange={(e) => setDays(Math.max(1, Math.min(28, Number(e.target.value))))} />
           </label>
         </div>
         {error !== null && <div className="notice danger">{error}</div>}

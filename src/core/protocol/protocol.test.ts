@@ -62,6 +62,16 @@ describe('folha de chaves', () => {
     expect(() => parseSheet('<script>')).toThrow(KeySheetError);
   });
 
+  it('não repete o dia do mês (até 28 dias, mesmo em fevereiro)', () => {
+    const feb = generateKeySheet({ net: 'REDE', stations: ['ALFA', 'BRAVO'], start: new Date(2027, 1, 1), days: 28 }, seededRandom(4));
+    expect(new Set(feb.days.map((d) => d.day)).size).toBe(28);
+    expect(() => generateKeySheet({ net: 'REDE', stations: ['ALFA', 'BRAVO'], start: new Date(2027, 1, 1), days: 31 })).toThrow(KeySheetError);
+    const json = JSON.parse(serializeSheet(feb)) as { d: string[] };
+    const d = [...json.d];
+    d[1] = d[0] ?? '';
+    expect(() => parseSheet(JSON.stringify({ ...json, d }))).toThrow(/repetido/);
+  });
+
   it('valida nome da rede, estações e validade', () => {
     expect(() => generateKeySheet({ net: 'X', stations: ['ALFA', 'BRAVO'], start: START, days: 7 })).toThrow(KeySheetError);
     expect(() => generateKeySheet({ net: 'REDE', stations: ['ALFA'], start: START, days: 7 })).toThrow(KeySheetError);
