@@ -12,6 +12,7 @@ import { SheetScreen } from './screens/SheetScreen';
 const CompareScreen = lazy(() => import('./screens/CompareScreen'));
 const BletchleyScreen = lazy(() => import('./screens/BletchleyScreen'));
 const HistoryScreen = lazy(() => import('./screens/HistoryScreen'));
+const PresentationScreen = lazy(() => import('./screens/PresentationScreen'));
 
 interface NavItem {
   readonly route: Route;
@@ -50,6 +51,8 @@ function Screen({ route }: { route: Route }) {
       return <BletchleyScreen />;
     case 'historia':
       return <HistoryScreen />;
+    case 'apresentacao':
+      return <PresentationScreen />;
   }
 }
 
@@ -112,7 +115,7 @@ export function App() {
         </Suspense>
         <p className="footer-note">
           SCV Technologies · Hackathon Univassouras Maricá 2026 · funciona offline, nada sai do seu aparelho ·{' '}
-          <a href={href('historia')}>referências</a>
+          <a href={href('historia')}>referências</a> · <a href={href('apresentacao')}>apresentação</a>
         </p>
       </main>
       <nav className="bottom-nav" aria-label="Seções principais">

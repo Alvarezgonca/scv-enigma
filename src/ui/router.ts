@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 
-export type Route = 'inicio' | 'maquina' | 'enviar' | 'receber' | 'folha' | 'comparar' | 'bletchley' | 'historia';
+export type Route = 'inicio' | 'maquina' | 'enviar' | 'receber' | 'folha' | 'comparar' | 'bletchley' | 'historia' | 'apresentacao';
 
-const ROUTES: readonly Route[] = ['inicio', 'maquina', 'enviar', 'receber', 'folha', 'comparar', 'bletchley', 'historia'];
+const ROUTES: readonly Route[] = ['inicio', 'maquina', 'enviar', 'receber', 'folha', 'comparar', 'bletchley', 'historia', 'apresentacao'];
 
 function current(): Route {
   const h = window.location.hash.replace(/^#\/?/, '').split('?')[0] ?? '';

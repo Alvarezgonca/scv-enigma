@@ -49,6 +49,9 @@ Diferenciais do edital, todos implementados:
 
 Sem câmera? A recepção lê foto do QR, texto colado ou arquivo `.txt`.
 
+Para abrir e fechar o pitch há uma tela de **apresentação** (`#/apresentacao`, link no rodapé), com setas do
+teclado e tela cheia; o último slide traz o QR com o endereço do app para o público experimentar no celular.
+
 ## Arquitetura
 
 Tudo roda no navegador; não há servidor. O canal é o próprio QR (rede isolada, como na Defesa Civil em
@@ -131,7 +134,7 @@ corrigidos e cobertos por testes (ver histórico de commits).
 ## Testes
 
 ```bash
-npm test          # 71 testes unitários (Vitest)
+npm test          # 72 testes unitários (Vitest)
 npm run test:e2e  # 5 testes de ponta a ponta no navegador (Playwright), contra o build de produção
 npm run check     # lint + tipos + unitários + build + ponta a ponta
 ```
