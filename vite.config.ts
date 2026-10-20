@@ -1,5 +1,6 @@
 import { type Plugin, defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import basicSsl from '@vitejs/plugin-basic-ssl';
 import { VitePWA } from 'vite-plugin-pwa';
 
 // No GitHub Pages o site fica em /<repositório>/; localmente, na raiz.
@@ -34,10 +35,13 @@ function contentSecurityPolicy(): Plugin {
   };
 }
 
-export default defineConfig({
+// `npm run dev:celular`: HTTPS com certificado local para abrir no celular pela rede Wi-Fi
+// (a câmera só funciona em HTTPS). O navegador mostra um aviso de certificado: é esperado.
+export default defineConfig(({ mode }) => ({
   base,
   plugins: [
     react(),
+    ...(mode === 'celular' ? [basicSsl()] : []),
     contentSecurityPolicy(),
     VitePWA({
       registerType: 'autoUpdate',
@@ -70,4 +74,4 @@ export default defineConfig({
   ],
   worker: { format: 'es' },
   build: { target: 'es2022', sourcemap: true },
-});
+}));

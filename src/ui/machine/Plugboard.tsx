@@ -155,10 +155,15 @@ export function Plugboard({ pairs, onChange, highlight = [], readOnly = false }:
           <stop offset="100%" stopColor="#202023" />
         </radialGradient>
         <linearGradient id="plugGrad" x1="0" x2="1">
-          <stop offset="0" stopColor="#151515" />
-          <stop offset="0.5" stopColor="#3d3d3d" />
-          <stop offset="1" stopColor="#151515" />
+          <stop offset="0" stopColor="#3a3a3c" />
+          <stop offset="0.45" stopColor="#9a9aa0" />
+          <stop offset="0.55" stopColor="#b9b9bf" />
+          <stop offset="1" stopColor="#3a3a3c" />
         </linearGradient>
+        <pattern id="plugGrip" width="6" height="42" patternUnits="userSpaceOnUse">
+          <rect width="6" height="42" fill="transparent" />
+          <rect x="0" width="2" height="42" fill="rgb(0 0 0 / 22%)" />
+        </pattern>
       </defs>
       {sockets.map((s) => (
         <g
@@ -212,7 +217,13 @@ export function Plugboard({ pairs, onChange, highlight = [], readOnly = false }:
             />
             <path className="cable" d={cablePath(pa, pb)} stroke="rgb(255 255 255 / 10%)" strokeWidth={3} />
             {[pa, pb].map((p) => (
-              <rect key={p.letter} className="plug-cap" x={p.x - 30} y={p.y - 16} width={60} height={42} rx={9} fill="url(#plugGrad)" />
+              <g key={p.letter}>
+                <rect className="plug-cap" x={p.x - 30} y={p.y - 16} width={60} height={42} rx={9} fill="url(#plugGrad)" />
+                <rect x={p.x - 22} y={p.y - 10} width={44} height={30} rx={6} fill="url(#plugGrip)" pointerEvents="none" />
+                <text x={p.x} y={p.y + 11} textAnchor="middle" fontSize="15" fontFamily="var(--mono)" fontWeight="600" fill="#1d1d1f" pointerEvents="none">
+                  {toLetter(p.letter === a ? b : a)}
+                </text>
+              </g>
             ))}
           </g>
         );

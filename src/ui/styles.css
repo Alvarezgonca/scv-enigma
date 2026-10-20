@@ -251,6 +251,40 @@ main {
     display: none;
   }
 
+  .topbar {
+    gap: 10px;
+  }
+
+  .station-badge {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand-sub {
+    display: none;
+  }
+
+  .brand-name {
+    font-size: 13px;
+    letter-spacing: 0.1em;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+  }
+
+  .station-badge {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+  }
+
   main {
     padding: 16px 16px 110px;
   }

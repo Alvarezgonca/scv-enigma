@@ -70,6 +70,7 @@ function Transmitter() {
   const [check, setCheck] = useState<'ok' | 'falhou' | null>(null);
   const [tab, setTab] = useState<'enigma' | 'aes'>('enigma');
   const abort = useRef<AbortController | null>(null);
+  const shownQr = useRef(false);
   const ctl = useEnigma(settingsForDay(day, [0, 0, 0]));
 
   // Cabeçalho formal, como nas mensagens militares: é também o crib que Bletchley Park exploraria.
@@ -81,6 +82,7 @@ function Transmitter() {
 
   const transmit = async (): Promise<void> => {
     if (letters.length === 0 || to === '') return;
+    shownQr.current = false;
     setBusy(true);
     setCheck(null);
     setStep(1);
@@ -296,7 +298,17 @@ function Transmitter() {
       </div>
 
       {enigma !== null && step === 6 && (
-        <div className="card" style={{ marginTop: 20 }}>
+        <div
+          className="card"
+          style={{ marginTop: 20 }}
+          ref={(el) => {
+            // No celular o QR fica longe da máquina: rola até ele quando fica pronto.
+            if (el !== null && !shownQr.current) {
+              shownQr.current = true;
+              el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          }}
+        >
           <div className="row" style={{ justifyContent: 'space-between' }}>
             <h2 style={{ margin: 0 }}>QR para a estação {to}</h2>
             <div className="segmented" role="tablist" aria-label="Modo do QR">

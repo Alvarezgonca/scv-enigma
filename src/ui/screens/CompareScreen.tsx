@@ -55,7 +55,7 @@ function Histogram({ values, color, labels }: { values: readonly number[]; color
   const max = Math.max(...values, 1e-9);
   return (
     <div>
-      <div className="hist">
+      <div className={`hist${values.length > 60 ? ' dense' : ''}`}>
         {values.map((v, i) => (
           <div key={i} style={{ height: `${(v / max) * 100}%`, background: color }} title={labels === undefined ? String(i) : `${labels[i] ?? ''}: ${v.toFixed(2)}`} />
         ))}
