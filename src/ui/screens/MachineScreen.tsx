@@ -2,11 +2,16 @@ import { useRef, useState } from 'react';
 import {
   type EnigmaModel,
   type EnigmaSettings,
+  type Pair,
+  EnigmaSettingsError,
   MODELS,
   describeSettings,
+  formatPlugboard,
   groupsOf5,
+  parsePlugboard,
   settingsFrom,
   toLetter,
+  validateSettings,
 } from '../../core/enigma';
 import { settingsForDay, todayKey } from '../../core/protocol';
 import { EnigmaView } from '../machine/EnigmaView';
@@ -28,6 +33,53 @@ function modelDefaults(model: EnigmaModel, current: EnigmaSettings): EnigmaSetti
     rule.rotors.includes(r.name) ? r : { ...r, name: rule.rotors[i] ?? 'I' },
   ) as unknown as EnigmaSettings['rotors'];
   return { ...current, model, rotors, reflector: rule.reflectors.includes('B') ? 'B' : (rule.reflectors[0] ?? 'B'), greek: null };
+}
+
+/** Plugboard por texto ("AV BS CG"): mais rápido que arrastar e acessível por leitor de tela. */
+function PlugboardText({ settings, disabled, onApply }: { settings: EnigmaSettings; disabled: boolean; onApply: (pairs: Pair[]) => void }) {
+  const current = formatPlugboard(settings.plugboard);
+  const [draft, setDraft] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const value = draft ?? current;
+  const apply = (): void => {
+    try {
+      const pairs = parsePlugboard(value);
+      const problems = validateSettings({ ...settings, plugboard: pairs });
+      if (problems.length > 0) {
+        setError(problems.join('; '));
+        return;
+      }
+      onApply(pairs);
+      setDraft(null);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof EnigmaSettingsError ? e.problems.join('; ') : 'pares inválidos');
+    }
+  };
+  return (
+    <div className="stack" style={{ marginTop: 12, gap: 6 }}>
+      <label className="field">
+        Plugboard por texto (pares separados por espaço)
+        <div className="row" style={{ flexWrap: 'nowrap' }}>
+          <input
+            type="text"
+            value={value}
+            disabled={disabled}
+            placeholder="ex.: AV BS CG DL FU HZ IN KM OW RX"
+            onChange={(e) => setDraft(e.target.value.toUpperCase())}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') apply();
+            }}
+            style={{ fontFamily: 'var(--mono)' }}
+          />
+          <button type="button" className="btn small" disabled={disabled || draft === null} onClick={apply}>
+            Aplicar
+          </button>
+        </div>
+      </label>
+      {error !== null && <div className="notice warn small">{error}</div>}
+    </div>
+  );
 }
 
 export function MachineScreen() {
@@ -101,6 +153,7 @@ export function MachineScreen() {
                 ))}
               </select>
             </label>
+            <PlugboardText settings={s} disabled={busy} onApply={(pairs) => ctl.setSettings({ ...s, plugboard: pairs })} />
             <div className="row" style={{ marginTop: 12 }}>
               <button
                 type="button"

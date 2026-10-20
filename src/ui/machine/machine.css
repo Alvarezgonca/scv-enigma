@@ -563,9 +563,9 @@
 }
 
 .plug-cap {
-  fill: #1b1b1b;
-  stroke: #666;
-  stroke-width: 1;
+  stroke: #2a2a2a;
+  stroke-width: 1.5;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 60%));
 }
 
 /* ---------------------------------------------------------- fita de papel */
