@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { lettersOnly, prepareText } from '../enigma';
-import { seededRandom } from '../modern';
+import { deflate, inflate, InflateLimitError, seededRandom } from '../modern';
 import {
   type AesFrame,
   type EnigmaFrame,
@@ -18,6 +18,7 @@ import {
   parseSheet,
   sealAesMessage,
   serializeSheet,
+  sheetFingerprint,
   sheetForStation,
   sheetToFrames,
 } from '.';
@@ -76,10 +77,26 @@ describe('folha de chaves', () => {
     const sealed = await sheetToFrames(station, { password: 'farol de itaipuaçu', iterations: 1000 });
     const parsed = sealed.map((f) => parseFrame(f) as SheetFrame);
     expect(parsed.every((f) => f.protectedByPassword)).toBe(true);
-    expect(await framesToSheet(parsed, 'farol de itaipuaçu', 1000)).toEqual(station);
-    await expect(framesToSheet(parsed, 'outra senha', 1000)).rejects.toThrow(/senha errada/);
+    expect(await framesToSheet(parsed, { password: 'farol de itaipuaçu', iterations: 1000 })).toEqual(station);
+    await expect(framesToSheet(parsed, { password: 'outra senha', iterations: 1000 })).rejects.toThrow(/senha errada/);
     await expect(framesToSheet(parsed)).rejects.toThrow(/protegida por senha/);
     if (parsed.length > 1) await expect(framesToSheet(parsed.slice(1))).rejects.toThrow(/falta a parte/);
+  });
+
+  it('recusa folha aberta quando se esperava senha, partes misturadas e o mesmo código de conferência', async () => {
+    const station = sheetForStation(newSheet(), 'BRAVO');
+    const open = (await sheetToFrames(station)).map((f) => parseFrame(f) as SheetFrame);
+    await expect(framesToSheet(open, { requirePassword: true })).rejects.toThrow(/SEM senha/);
+    await expect(framesToSheet(open, { password: 'qualquer' })).rejects.toThrow(/SEM senha/);
+    const other = (await sheetToFrames(sheetForStation(newSheet(5), 'BRAVO'))).map((f) => parseFrame(f) as SheetFrame);
+    await expect(framesToSheet([open[0], ...other.slice(1)])).rejects.toThrow(/mesma folha|falta/);
+    expect(await sheetFingerprint(station)).toMatch(/^[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}$/);
+    expect(await sheetFingerprint(station)).toBe(await sheetFingerprint(parseSheet(serializeSheet(station))));
+  });
+
+  it('não abre bomba de compressão', async () => {
+    const bomb = await deflate(new Uint8Array(5 * 1024 * 1024));
+    await expect(inflate(bomb)).rejects.toBeInstanceOf(InflateLimitError);
   });
 });
 

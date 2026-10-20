@@ -132,23 +132,36 @@ export async function encryptWithPassword(
   password: string,
   random: (n: number) => Uint8Array,
   iterations = PBKDF2_ITERATIONS,
+  aad: Uint8Array = new Uint8Array(0),
 ): Promise<Uint8Array> {
   const salt = random(16);
   const iv = random(12);
   const key = await keyFromPassword(password, salt, iterations);
-  const ct = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv: buf(iv) }, key, buf(data)));
+  const ct = new Uint8Array(await subtle().encrypt({ name: 'AES-GCM', iv: buf(iv), additionalData: buf(aad) }, key, buf(data)));
   return concatBytes(salt, iv, ct);
 }
 
-export async function decryptWithPassword(blob: Uint8Array, password: string, iterations = PBKDF2_ITERATIONS): Promise<Uint8Array> {
+export async function decryptWithPassword(
+  blob: Uint8Array,
+  password: string,
+  iterations = PBKDF2_ITERATIONS,
+  aad: Uint8Array = new Uint8Array(0),
+): Promise<Uint8Array> {
   if (blob.length < 16 + 12 + TAG_BYTES) throw new AuthenticationError('dados protegidos incompletos');
   const key = await keyFromPassword(password, blob.slice(0, 16), iterations);
   try {
-    const pt = await subtle().decrypt({ name: 'AES-GCM', iv: buf(blob.slice(16, 28)) }, key, buf(blob.slice(28)));
+    const pt = await subtle().decrypt({ name: 'AES-GCM', iv: buf(blob.slice(16, 28)), additionalData: buf(aad) }, key, buf(blob.slice(28)));
     return new Uint8Array(pt);
   } catch {
     throw new AuthenticationError('senha errada ou dados adulterados');
   }
+}
+
+/** Resumo SHA-256 curto para conferir à vista, nos dois aparelhos, que a folha é a mesma. */
+export async function fingerprint(data: Uint8Array): Promise<string> {
+  const digest = new Uint8Array(await subtle().digest('SHA-256', buf(data)));
+  const hex = [...digest.slice(0, 6)].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return `${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;
 }
 
 /* ---------- compressão (a folha de chaves cabe em menos QR) ---------- */
@@ -162,6 +175,30 @@ export function deflate(bytes: Uint8Array): Promise<Uint8Array> {
   return pipe(bytes, new CompressionStream('deflate-raw'));
 }
 
-export function inflate(bytes: Uint8Array): Promise<Uint8Array> {
-  return pipe(bytes, new DecompressionStream('deflate-raw'));
+/** Teto de descompressão: uma folha real tem poucos KB; isto barra "bomba de compressão". */
+export const MAX_INFLATED_BYTES = 64 * 1024;
+
+export class InflateLimitError extends Error {
+  constructor() {
+    super(`conteúdo descomprimido passa de ${MAX_INFLATED_BYTES / 1024} KB`);
+    this.name = 'InflateLimitError';
+  }
+}
+
+/** Descomprime lendo aos poucos e para assim que passar do teto. */
+export async function inflate(bytes: Uint8Array, maxBytes = MAX_INFLATED_BYTES): Promise<Uint8Array> {
+  const reader = new Blob([buf(bytes)]).stream().pipeThrough(new DecompressionStream('deflate-raw')).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new InflateLimitError();
+    }
+    chunks.push(value);
+  }
+  return concatBytes(...chunks);
 }
