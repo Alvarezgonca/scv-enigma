@@ -1,4 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
+import { CAMERA_FILE } from './e2e/global-setup';
 
 /**
  * Testes de ponta a ponta no navegador de verdade, contra o build de produção (com a CSP ligada).
@@ -16,8 +17,25 @@ export default defineConfig({
     trace: 'retain-on-failure',
     ...(process.env.CI === undefined ? { channel: 'chrome' } : {}),
   },
+  globalSetup: './e2e/global-setup.ts',
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'], ...(process.env.CI === undefined ? { channel: 'chrome' } : {}) } },
+    {
+      name: 'desktop',
+      testIgnore: /camera\.spec/,
+      use: { ...devices['Desktop Chrome'], ...(process.env.CI === undefined ? { channel: 'chrome' } : {}) },
+    },
+    {
+      name: 'camera',
+      testMatch: /camera\.spec/,
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env.CI === undefined ? { channel: 'chrome' } : {}),
+        permissions: ['camera'],
+        launchOptions: {
+          args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream', `--use-file-for-fake-video-capture=${CAMERA_FILE}`],
+        },
+      },
+    },
   ],
   webServer: {
     command: 'npm run build && npx vite preview --port 4173 --strictPort',

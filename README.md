@@ -132,7 +132,7 @@ corrigidos e cobertos por testes (ver histórico de commits).
 
 ```bash
 npm test          # 71 testes unitários (Vitest)
-npm run test:e2e  # 3 testes de ponta a ponta no navegador (Playwright), contra o build de produção
+npm run test:e2e  # 4 testes de ponta a ponta no navegador (Playwright), contra o build de produção
 npm run check     # lint + tipos + unitários + build + ponta a ponta
 ```
 
@@ -147,7 +147,8 @@ O que eles provam:
   ordem, cabeçalho alterado ou chave de outro par: recusa.
 - **Bomba:** 12/12 chaves aleatórias recuperadas com a ordem conhecida; busca completa nas 60 ordens.
 - **Ponta a ponta:** dois navegadores (dois aparelhos): folha por foto do QR com senha e código de
-  conferência; mensagem Enigma e AES por foto do QR; chave errada; adulteração; uso offline.
+  conferência; mensagem Enigma e AES por foto do QR; chave errada; adulteração; uso offline; e a
+  **câmera ao vivo**, com um vídeo de câmera falsa mostrando um QR (getUserMedia → canvas → ZXing).
 
 ## Como executar
 
