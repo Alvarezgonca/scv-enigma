@@ -64,11 +64,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setSheet = useCallback(
     async (next: KeySheet | null, station?: string | null) => {
-      setSheetState(next);
-      await saveSheet(next);
+      // Estação e folha mudam juntas: nenhuma tela chega a ver a folha nova sem a estação.
       if (station !== undefined) setPrefs({ station });
       else if (next?.holder !== null && next?.holder !== undefined) setPrefs({ station: next.holder });
       else if (next === null) setPrefs({ station: null });
+      setSheetState(next);
+      await saveSheet(next);
     },
     [setPrefs],
   );

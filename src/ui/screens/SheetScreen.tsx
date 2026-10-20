@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { toLetter } from '../../core/enigma';
-import { fingerprint, fromBase64Url } from '../../core/modern';
+import { fingerprint, fromBase64Url, utf8 } from '../../core/modern';
 import {
   type KeySheet,
   type SheetFrame,
@@ -11,7 +11,7 @@ import {
   framesToSheet,
   generateKeySheet,
   parseFrame,
-  sheetFingerprint,
+  serializeSheet,
   sheetForStation,
   sheetToFrames,
   todayKey,
@@ -27,19 +27,21 @@ function todayIso(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+/** Código de conferência da folha. Depende do conteúdo (texto), não da identidade do objeto. */
 function useFingerprint(sheet: KeySheet | null): string | null {
-  const [fp, setFp] = useState<{ id: KeySheet | null; value: string } | null>(null);
+  const text = sheet === null ? null : serializeSheet(sheet);
+  const [fp, setFp] = useState<{ text: string; value: string } | null>(null);
   useEffect(() => {
-    if (sheet === null) return;
+    if (text === null) return;
     let alive = true;
-    void sheetFingerprint(sheet).then((value) => {
-      if (alive) setFp({ id: sheet, value });
+    void fingerprint(utf8(text)).then((value) => {
+      if (alive) setFp({ text, value });
     });
     return () => {
       alive = false;
     };
-  }, [sheet]);
-  return fp !== null && fp.id === sheet ? fp.value : null;
+  }, [text]);
+  return fp !== null && fp.text === text ? fp.value : null;
 }
 
 function CreateNet() {
@@ -321,11 +323,12 @@ function PairList({ sheet }: { sheet: KeySheet }) {
 
 function Distribute({ sheet, me }: { sheet: KeySheet; me: string | null }) {
   const others = sheet.stations.filter((s) => s !== me);
-  const [target, setTarget] = useState(others[0] ?? '');
+  const [chosen, setTarget] = useState<string | null>(null);
+  const target = chosen !== null && others.includes(chosen) ? chosen : (others[0] ?? '');
   const [password, setPassword] = useState('');
   const [frames, setFrames] = useState<string[] | null>(null);
   const [busy, setBusy] = useState(false);
-  const copy = useMemo(() => (target === '' ? null : sheetForStation(sheet, target)), [sheet, target]);
+  const copy = target === '' ? null : sheetForStation(sheet, target);
   const fp = useFingerprint(copy);
 
   const make = async (): Promise<void> => {
