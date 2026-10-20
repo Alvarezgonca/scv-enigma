@@ -90,7 +90,7 @@ describe('folha de chaves', () => {
     await expect(framesToSheet(open, { password: 'qualquer' })).rejects.toThrow(/SEM senha/);
     const other = (await sheetToFrames(sheetForStation(newSheet(5), 'BRAVO'))).map((f) => parseFrame(f) as SheetFrame);
     await expect(framesToSheet([open[0], ...other.slice(1)])).rejects.toThrow(/mesma folha|falta/);
-    expect(await sheetFingerprint(station)).toMatch(/^[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}$/);
+    expect(await sheetFingerprint(station)).toMatch(/^(?:[0-9A-F]{4}-){4}[0-9A-F]{4}$/);
     expect(await sheetFingerprint(station)).toBe(await sheetFingerprint(parseSheet(serializeSheet(station))));
   });
 

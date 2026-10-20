@@ -157,11 +157,14 @@ export async function decryptWithPassword(
   }
 }
 
-/** Resumo SHA-256 curto para conferir à vista, nos dois aparelhos, que a folha é a mesma. */
+/**
+ * Resumo SHA-256 para conferir à vista, nos dois aparelhos, que a folha é a mesma. Mostra 80 bits
+ * (5 grupos de 4): forjar outra folha com o mesmo código custaria ~2^80 tentativas.
+ */
 export async function fingerprint(data: Uint8Array): Promise<string> {
   const digest = new Uint8Array(await subtle().digest('SHA-256', buf(data)));
-  const hex = [...digest.slice(0, 6)].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
-  return `${hex.slice(0, 4)}-${hex.slice(4, 8)}-${hex.slice(8, 12)}`;
+  const hex = [...digest.slice(0, 10)].map((b) => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+  return hex.match(/.{4}/g)?.join('-') ?? hex;
 }
 
 /* ---------- compressão (a folha de chaves cabe em menos QR) ---------- */
