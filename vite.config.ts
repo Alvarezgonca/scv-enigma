@@ -69,6 +69,10 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm,webmanifest}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: 'index.html',
+        // Com injectRegister: false o plugin não liga estes dois sozinho, e a versão nova ficava
+        // esperando até fechar todas as abas do site; assim ela assume e a página recarrega.
+        skipWaiting: true,
+        clientsClaim: true,
         // Os slides (~1 MB) ficam fora do pacote offline de quem só escaneia o QR: entram no cache
         // quando a apresentação é aberta uma vez, e daí em diante funcionam sem internet.
         runtimeCaching: [
