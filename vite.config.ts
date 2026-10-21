@@ -69,6 +69,15 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2,wasm,webmanifest}'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
         navigateFallback: 'index.html',
+        // Os slides (~1 MB) ficam fora do pacote offline de quem só escaneia o QR: entram no cache
+        // quando a apresentação é aberta uma vez, e daí em diante funcionam sem internet.
+        runtimeCaching: [
+          {
+            urlPattern: /\/assets\/\d-[\w-]+\.webp$/,
+            handler: 'CacheFirst',
+            options: { cacheName: 'slides', expiration: { maxEntries: 20 } },
+          },
+        ],
       },
     }),
   ],

@@ -49,8 +49,10 @@ Diferenciais do edital, todos implementados:
 
 Sem câmera? A recepção lê foto do QR, texto colado ou arquivo `.txt`.
 
-Para abrir e fechar o pitch há uma tela de **apresentação** (`#/apresentacao`, link no rodapé), com setas do
-teclado e tela cheia; o último slide traz o QR com o endereço do app para o público experimentar no celular.
+Para abrir e fechar o pitch há uma tela de **apresentação** (`#/apresentacao`, link no rodapé) com os 7 slides
+que a Clara desenhou no Canva: setas do teclado ou passador, clique (terço esquerdo volta) e tela cheia. No slide
+"Experimente", o QR com o endereço do app é desenhado pelo próprio app em SVG, nítido no projetor, para o público
+experimentar no celular. Os slides entram no cache na primeira abertura e depois funcionam sem internet.
 
 ## Arquitetura
 

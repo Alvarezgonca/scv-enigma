@@ -1,136 +1,66 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Icon } from '../icons';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { QrCode } from '../qr/QrCode';
 import { href } from '../router';
+import titulo from './slides/1-titulo.webp';
+import grupo from './slides/2-grupo.webp';
+import problema from './slides/3-problema.webp';
+import arquitetura from './slides/4-arquitetura.webp';
+import engenharia from './slides/5-engenharia.webp';
+import experimente from './slides/6-experimente.webp';
+import obrigado from './slides/7-obrigado.webp';
 
-/** Endereços públicos (valem depois de publicar o repositório e o GitHub Pages). */
+/** Endereço público do app no GitHub Pages: o QR do slide "Experimente" abre aqui. */
 const APP_URL = 'https://alvarezgonca.github.io/scv-enigma/';
-const REPO_URL = 'https://github.com/Alvarezgonca/scv-enigma';
 
-const SLIDES: readonly { id: string; render: () => React.JSX.Element }[] = [
-  {
-    id: 'titulo',
-    render: () => (
-      <div className="slide-center">
-        <div className="slide-logo">
-          <Icon.Logo />
-        </div>
-        <div className="eyebrow">Hackathon Univassouras Maricá 2026 · Desafio 2</div>
-        <h1 className="slide-title">
-          SCV Enigma: <em>Enigma</em> × <strong>criptografia moderna</strong>
-        </h1>
-        <p className="slide-lead">Uma rede de máquinas Enigma fiéis à original, por QR Code, ao lado do AES-256-GCM.</p>
-        <p className="slide-team">Ana Clara Moledo Neves · Daniel Alvarez Gonçalves · Victor Bernardo Tatagiba</p>
-      </div>
-    ),
-  },
+/**
+ * Slides desenhados pela Clara no Canva, exportados em 1920×1080. O texto de cada um vai no `alt`.
+ * No slide "Experimente", o QR é desenhado pelo app em SVG por cima do da arte, nítido em qualquer
+ * projetor.
+ */
+const SLIDES: readonly { id: string; src: string; alt: string; qr?: true }[] = [
+  { id: 'titulo', src: titulo, alt: 'SCV Enigma: Enigma × criptografia moderna. SCV Technologies.' },
+  { id: 'grupo', src: grupo, alt: 'Grupo: Clara Moledo, Daniel Alvarez e Victor Tatagiba.' },
   {
     id: 'problema',
-    render: () => (
-      <div className="slide-grid">
-        <div>
-          <div className="eyebrow">O problema</div>
-          <h2 className="slide-h">O algoritmo raramente é o problema.</h2>
-          <p className="slide-lead">
-            A Enigma caiu por um detalhe de projeto (nenhuma letra vira ela mesma), procedimentos previsíveis e chaves
-            capturadas. Os incidentes de hoje seguem o mesmo padrão.
-          </p>
-        </div>
-        <ul className="slide-list">
-          <li>
-            <b>1941 · U-110</b> folhas de chaves capturadas
-          </li>
-          <li>
-            <b>2025 · C&amp;M Software</b> credenciais e fornecedor no Pix
-          </li>
-          <li>
-            <b>2026 · Meu INSS</b> consulta de serviço exposta: 2,8 milhões de CPFs
-          </li>
-          <li>
-            <b>2026 · Chaves Pix</b> exposições prolongadas de dados
-          </li>
-        </ul>
-      </div>
-    ),
+    src: problema,
+    alt:
+      'O problema. O algoritmo raramente é o problema. A Enigma caiu por um detalhe de projeto (nenhuma letra vira ela mesma), ' +
+      'procedimentos previsíveis e chaves capturadas. Os incidentes de hoje seguem o mesmo padrão. ' +
+      '1941 · U-110: folhas de chaves capturadas. 2025 · C&M Software: credenciais e fornecedor no Pix. ' +
+      '2026 · Meu INSS: consulta de serviço exposta, 2,8 milhões de CPFs. 2026 · Chaves Pix: exposições prolongadas de dados.',
   },
   {
     id: 'arquitetura',
-    render: () => (
-      <div>
-        <div className="eyebrow">Arquitetura</div>
-        <h2 className="slide-h">Sem servidor: o QR é o canal.</h2>
-        <div className="slide-arch">
-          <div className="arch-box ui">Interface React · máquina 2.5D · som · PWA offline</div>
-          <div className="arch-row">
-            <div className="arch-box">core/protocol · quadros SCV1, folha de chaves, indicador de 1940</div>
-          </div>
-          <div className="arch-row">
-            <div className="arch-box enigma">core/enigma · I, M3, M4, passo duplo</div>
-            <div className="arch-box modern">core/modern · AES-256-GCM, HKDF, PBKDF2, Base45</div>
-            <div className="arch-box">core/analysis · crib, Bomba em paralelo</div>
-          </div>
-        </div>
-        <p className="slide-lead small-lead">
-          Rede isolada e offline (Defesa Civil, infraestrutura crítica). LGPD por desenho: nada sai do aparelho, folha cifrada em
-          repouso, segredo por par de estações (menor privilégio).
-        </p>
-      </div>
-    ),
+    src: arquitetura,
+    alt:
+      'Arquitetura. Sem servidor: o QR é o canal. 01 Interface React · máquina 2.5D · som · PWA offline. ' +
+      '02 core/protocol · quadros SCV1, folha de chaves, indicador de 1940. 03 core/enigma · I, M3, M4, passo duplo. ' +
+      '04 core/modern · AES-256-GCM, HKDF, PBKDF2, Base45. 05 core/analysis · crib, Bomba em paralelo. ' +
+      'Rede isolada e offline (Defesa Civil, infraestrutura crítica). LGPD por desenho: nada sai do aparelho, ' +
+      'folha cifrada em repouso, segredo por par de estações (menor privilégio).',
   },
   {
     id: 'engenharia',
-    render: () => (
-      <div className="slide-grid">
-        <div>
-          <div className="eyebrow">Engenharia</div>
-          <h2 className="slide-h">Provado, não prometido.</h2>
-          <p className="slide-lead">
-            A mensagem real da Operação Barbarossa (1941) decifra letra por letra. Dois navegadores trocam folha e mensagens por
-            foto do QR. A câmera lê ao vivo. A Bomba quebra a Enigma no build de produção.
-          </p>
-        </div>
-        <div className="slide-stats">
-          <div>
-            <b>77</b>
-            <span>testes automáticos</span>
-          </div>
-          <div>
-            <b>~7 s</b>
-            <span>para a Bomba testar as 60 ordens</span>
-          </div>
-          <div>
-            <b>2¹²⁸</b>
-            <span>chance de falsificar no GCM: 1 em</span>
-          </div>
-          <div>
-            <b>0</b>
-            <span>dados pessoais coletados</span>
-          </div>
-        </div>
-      </div>
-    ),
+    src: engenharia,
+    alt:
+      'Engenharia. Provado, não prometido. A mensagem real da Operação Barbarossa (1941) decifra letra por letra. ' +
+      'Dois navegadores trocam folha e mensagens por foto do QR. A câmera lê ao vivo. A Bomba quebra a Enigma no build de produção. ' +
+      '77 testes automáticos. 0 dados pessoais coletados. Chance de falsificar no GCM: 1 em 2¹²⁸. ~7 s para a Bomba testar as 60 ordens.',
   },
   {
-    id: 'fim',
-    render: () => (
-      <div className="slide-grid">
-        <div>
-          <div className="eyebrow">Experimente</div>
-          <h2 className="slide-h">O caminho seguro tem de ser o mais fácil.</h2>
-          <p className="slide-lead">Aponte a câmera: a máquina abre no seu celular e funciona até sem internet.</p>
-          <p className="slide-team mono">{APP_URL}</p>
-          <p className="slide-team mono">{REPO_URL}</p>
-        </div>
-        <div className="slide-qr">
-          <QrCode text={APP_URL} label="QR com o endereço do app" ecl="M" />
-        </div>
-      </div>
-    ),
+    id: 'experimente',
+    src: experimente,
+    alt:
+      'Experimente. Aponte a câmera: a máquina abre no seu celular e funciona até sem internet. ' +
+      'https://alvarezgonca.github.io/scv-enigma/ · https://github.com/Alvarezgonca/scv-enigma',
+    qr: true,
   },
+  { id: 'obrigado', src: obrigado, alt: 'Obrigado pela atenção.' },
 ];
 
 export default function PresentationScreen() {
   const [i, setI] = useState(0);
+  const root = useRef<HTMLDivElement>(null);
   const go = useCallback((d: number) => setI((x) => Math.max(0, Math.min(SLIDES.length - 1, x + d))), []);
 
   useEffect(() => {
@@ -147,11 +77,30 @@ export default function PresentationScreen() {
     return () => window.removeEventListener('keydown', on);
   }, [go]);
 
+  // Baixa todos de uma vez: a troca fica instantânea e o service worker guarda para usar sem internet.
+  useEffect(() => {
+    for (const s of SLIDES) new Image().src = s.src;
+  }, []);
+
   const slide = SLIDES[i] ?? SLIDES[0];
   return (
-    <div className="slides" aria-roledescription="apresentação">
-      <section className="slide" aria-label={`Slide ${i + 1} de ${SLIDES.length}`} key={slide?.id}>
-        {slide?.render()}
+    <div className="slides" ref={root} aria-roledescription="apresentação">
+      <section
+        className="slide"
+        aria-label={`Slide ${i + 1} de ${SLIDES.length}`}
+        key={slide?.id}
+        // Clique no terço esquerdo volta; no resto, avança (serve também em tela cheia, sem os botões).
+        onClick={(e) => {
+          const r = e.currentTarget.getBoundingClientRect();
+          go(e.clientX - r.left < r.width / 3 ? -1 : 1);
+        }}
+      >
+        <img src={slide?.src} alt={slide?.alt} width={1920} height={1080} />
+        {slide?.qr === true && (
+          <div className="slide-qr">
+            <QrCode text={APP_URL} label="QR com o endereço do app" ecl="M" />
+          </div>
+        )}
       </section>
       <div className="slide-nav no-print">
         <button type="button" className="btn small" onClick={() => go(-1)} disabled={i === 0} aria-label="Slide anterior">
@@ -167,7 +116,7 @@ export default function PresentationScreen() {
           type="button"
           className="btn small ghost"
           onClick={() => {
-            if (document.fullscreenElement === null) void document.documentElement.requestFullscreen();
+            if (document.fullscreenElement === null) void root.current?.requestFullscreen();
             else void document.exitFullscreen();
           }}
         >
